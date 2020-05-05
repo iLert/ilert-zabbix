@@ -1,3 +1,3 @@
 # ilert-zabbix
 
-iLert Zabbix Integration
+[iLert Zabbix Integration Guide](https://docs.ilert.com/integrations/zabbix/)
