@@ -3,9 +3,9 @@
 
 # iLert Zabbix Plugin
 #
-# Copyright (c) 2018, iLert GmbH. <info@ilert.de>
+# Copyright (c) 2020, iLert GmbH. <support@ilert.com>
 # All rights reserved.
-# see https://support.ilert.de/display/ID/Zabbix+Integration for setup instructions
+# see https://docs.ilert.com/integrations/zabbix for setup instructions
 
 
 import fcntl
@@ -18,7 +18,7 @@ PLUGIN_VERSION = "1.0"
 
 CONFIG = {
     'tmp_dir': '/tmp/ilert_zabbix',
-    'api_endpoint': 'https://ilertnow.com',
+    'api_endpoint': 'https://api.ilert.com',
     'api_port': 443
 }
 
@@ -159,7 +159,7 @@ def main():
         try:
             json_payload = json.loads(args.payload.strip())
         except ValueError as e:
-            error_msg = "payload must be valid json (see https://support.ilert.de/display/ID/Zabbix+Integration). " \
+            error_msg = "payload must be valid json (see https://docs.ilert.com/integrations/zabbix). " \
                         "Error: %s " % e.args
             syslog.syslog(syslog.LOG_ERR, error_msg)
             parser.error(error_msg)
