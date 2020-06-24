@@ -118,6 +118,20 @@ def flush(directory, endpoint, port):
             syslog.syslog('event %s has been sent to iLert and removed from event directory' % event)
 
 
+def payload_cleanup(value):
+    t = value.replace("\n", "").replace("\r", "").strip("{}").split("\",")
+    s = []
+    for i in t:
+        for j in i.split("\":"):
+            s.append(j.strip(' '))
+    result={}
+    for i in range(1, len(s), 2):
+        k = s[i - 1][1 : len(s[i - 1])]
+        decr = 1 if s[i].endswith("\"") else 0
+        result[k] = s[i][1 : len(s[i]) - decr]
+    return json.dumps(result)
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description='send events from Zabbix to iLert')
@@ -157,7 +171,7 @@ def main():
 
         # validate json first
         try:
-            json_payload = json.loads(args.payload.strip())
+            json_payload = payload_cleanup(json.loads(args.payload.strip()))
         except ValueError as e:
             error_msg = "payload must be valid json (see https://docs.ilert.com/integrations/zabbix). " \
                         "Error: %s " % e.args
