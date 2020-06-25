@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2020-06-23T09:47:15Z</date>
+    <media_types>
+        <media_type>
+            <name>iLert</name>
+            <type>WEBHOOK</type>
+            <parameters>
+                <parameter>
+                    <name>ALERT.MESSAGE</name>
+                    <value>{ALERT.MESSAGE}</value>
+                </parameter>
+                <parameter>
+                    <name>ALERT.SUBJECT</name>
+                    <value>{ALERT.SUBJECT}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.ACK.STATUS</name>
+                    <value>{EVENT.ACK.STATUS}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.DATE</name>
+                    <value>{EVENT.DATE}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.ID</name>
+                    <value>{EVENT.ID}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.NAME</name>
+                    <value>{EVENT.NAME}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.NSEVERITY</name>
+                    <value>{EVENT.NSEVERITY}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.OPDATA</name>
+                    <value>{EVENT.OPDATA}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.RECOVERY.DATE</name>
+                    <value>{EVENT.RECOVERY.DATE}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.RECOVERY.TIME</name>
+                    <value>{EVENT.RECOVERY.TIME}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.RECOVERY.VALUE</name>
+                    <value>{EVENT.RECOVERY.VALUE}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.SEVERITY</name>
+                    <value>{EVENT.SEVERITY}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.TAGS</name>
+                    <value>{EVENT.TAGS}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.TIME</name>
+                    <value>{EVENT.TIME}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.UPDATE.ACTION</name>
+                    <value>{EVENT.UPDATE.ACTION}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.UPDATE.DATE</name>
+                    <value>{EVENT.UPDATE.DATE}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.UPDATE.MESSAGE</name>
+                    <value>{EVENT.UPDATE.MESSAGE}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.UPDATE.STATUS</name>
+                    <value>{EVENT.UPDATE.STATUS}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.UPDATE.TIME</name>
+                    <value>{EVENT.UPDATE.TIME}</value>
+                </parameter>
+                <parameter>
+                    <name>EVENT.VALUE</name>
+                    <value>{EVENT.VALUE}</value>
+                </parameter>
+                <parameter>
+                    <name>HOST.HOST</name>
+                    <value>{HOST.HOST}</value>
+                </parameter>
+                <parameter>
+                    <name>HOST.IP</name>
+                    <value>{HOST.IP}</value>
+                </parameter>
+                <parameter>
+                    <name>HOST.NAME</name>
+                    <value>{HOST.NAME}</value>
+                </parameter>
+                <parameter>
+                    <name>ILERT.ALERT.SOURCE.URL</name>
+                    <value>&lt;put your iLert alert source URL here&gt;</value>
+                </parameter>
+                <parameter>
+                    <name>ILERT.INCIDENT.SUMMARY</name>
+                    <value />
+                </parameter>
+                <parameter>
+                    <name>TRIGGER.DESCRIPTION</name>
+                    <value>{TRIGGER.DESCRIPTION}</value>
+                </parameter>
+                <parameter>
+                    <name>TRIGGER.ID</name>
+                    <value>{TRIGGER.ID}</value>
+                </parameter>
+                <parameter>
+                    <name>TRIGGER.NAME</name>
+                    <value>{TRIGGER.NAME}</value>
+                </parameter>
+                <parameter>
+                    <name>TRIGGER.SEVERITY</name>
+                    <value>{TRIGGER.SEVERITY}</value>
+                </parameter>
+                <parameter>
+                    <name>TRIGGER.STATUS</name>
+                    <value>{TRIGGER.STATUS}</value>
+                </parameter>
+                <parameter>
+                    <name>TRIGGER.URL</name>
+                    <value>{TRIGGER.URL}</value>
+                </parameter>
+                <parameter>
+                    <name>TRIGGER.VALUE</name>
+                    <value>{TRIGGER.VALUE}</value>
+                </parameter>
+                <parameter>
+                    <name>USER.FULLNAME</name>
+                    <value>{USER.FULLNAME}</value>
+                </parameter>
+                <parameter>
+                    <name>ZABBIX.URL</name>
+                    <value>{$ZABBIX.URL}</value>
+                </parameter>
+            </parameters>
+            <script>try {&#13;
+    var result = { tags: {} },&#13;
+        params = JSON.parse(value),&#13;
+        req = new CurlHttpRequest(),&#13;
+        resp = '';&#13;
+&#13;
+    if (typeof params.HTTPProxy === 'string' &amp;&amp; params.HTTPProxy.trim() !== '') {&#13;
+        req.SetProxy(params.HTTPProxy);&#13;
+    }&#13;
+    var reqURL = params['ILERT.ALERT.SOURCE.URL'];&#13;
+    if (typeof reqURL === 'string' &amp;&amp; reqURL.trim() === '') {&#13;
+        throw 'incorrect value for variable &quot;ILERT.ALERT.SOURCE.URL&quot;. The value must be a non-empty string.';&#13;
+    }&#13;
+    delete params['ILERT.ALERT.SOURCE.URL'];&#13;
+&#13;
+    req.AddHeader('Accept: application/json');&#13;
+    req.AddHeader('Content-Type: application/json');&#13;
+&#13;
+    Zabbix.Log(4, '[iLert Webhook] Sending request:' + JSON.stringify(params));&#13;
+    resp = req.Post(reqURL, JSON.stringify(params));&#13;
+    Zabbix.Log(4, '[iLert Webhook] Receiving response:' + resp);&#13;
+&#13;
+    try {&#13;
+        resp = JSON.parse(resp);&#13;
+    }&#13;
+    catch (error) {&#13;
+        throw 'incorrect response. iLert returned a non-JSON object.';&#13;
+    }&#13;
+&#13;
+    if (req.Status() != 200) {&#13;
+        if (typeof resp === 'object' &amp;&amp; typeof resp.message === 'string') {&#13;
+            throw resp.message;&#13;
+        }&#13;
+        else {&#13;
+            throw 'Unknown error.';&#13;
+        }&#13;
+    }&#13;
+&#13;
+    if (typeof resp === 'object' &amp;&amp; typeof resp.incidentUrl === 'string') {&#13;
+        result.tags.ilert_incident_url = resp.incidentUrl;&#13;
+    }&#13;
+&#13;
+    return JSON.stringify(result);&#13;
+}&#13;
+catch (error) {&#13;
+    Zabbix.Log(3, '[iLert Webhook] Notification failed : ' + error);&#13;
+    throw 'iLert notification failed : ' + error;&#13;
+}</script>
+            <process_tags>YES</process_tags>
+            <show_event_menu>YES</show_event_menu>
+            <event_menu_url>{EVENT.TAGS.ilert_incident_url}</event_menu_url>
+            <event_menu_name>Alert in iLert</event_menu_name>
+            <description>Please refer to https://docs.ilert.com/integration/zabbix.&#13;
+  &#13;
+Set global macro {$ZABBIX.URL} with your Zabbix server URL.&#13;
+Add a dedicated user with the media type &quot;iLert&quot; and place the alert source url in the &quot;ILERT.ALERT.SOURCE.URL&quot; parameter to integrate into the service. You can also rewrite the incident summary via &quot;ILERT.INCIDENT.SUMMARY&quot; parameter or leave it empty to use the standard pattern.</description>
+        </media_type>
+    </media_types>
+</zabbix_export>
