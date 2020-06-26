@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>5.0</version>
-    <date>2020-06-23T09:47:15Z</date>
+    <date>2020-06-26T12:07:12Z</date>
     <media_types>
         <media_type>
             <name>iLert</name>
             <type>WEBHOOK</type>
             <parameters>
+                <parameter>
+                    <name>.ILERT.ALERT.SOURCE.KEY</name>
+                    <value>&lt;put your iLert alert source key here&gt;</value>
+                </parameter>
+                <parameter>
+                    <name>.ILERT.INCIDENT.SUMMARY</name>
+                    <value />
+                </parameter>
                 <parameter>
                     <name>ALERT.MESSAGE</name>
                     <value>{ALERT.MESSAGE}</value>
@@ -100,12 +108,44 @@
                     <value>{HOST.NAME}</value>
                 </parameter>
                 <parameter>
-                    <name>ILERT.ALERT.SOURCE.URL</name>
-                    <value>&lt;put your iLert alert source URL here&gt;</value>
+                    <name>ITEM.ID1</name>
+                    <value>{ITEM.ID1}</value>
                 </parameter>
                 <parameter>
-                    <name>ILERT.INCIDENT.SUMMARY</name>
-                    <value />
+                    <name>ITEM.ID2</name>
+                    <value>{ITEM.ID2}</value>
+                </parameter>
+                <parameter>
+                    <name>ITEM.ID3</name>
+                    <value>{ITEM.ID3}</value>
+                </parameter>
+                <parameter>
+                    <name>ITEM.ID4</name>
+                    <value>{ITEM.ID4}</value>
+                </parameter>
+                <parameter>
+                    <name>ITEM.ID5</name>
+                    <value>{ITEM.ID5}</value>
+                </parameter>
+                <parameter>
+                    <name>ITEM.NAME1</name>
+                    <value>{ITEM.NAME1}</value>
+                </parameter>
+                <parameter>
+                    <name>ITEM.NAME2</name>
+                    <value>{ITEM.NAME2}</value>
+                </parameter>
+                <parameter>
+                    <name>ITEM.NAME3</name>
+                    <value>{ITEM.NAME3}</value>
+                </parameter>
+                <parameter>
+                    <name>ITEM.NAME4</name>
+                    <value>{ITEM.NAME4}</value>
+                </parameter>
+                <parameter>
+                    <name>ITEM.NAME5</name>
+                    <value>{ITEM.NAME5}</value>
                 </parameter>
                 <parameter>
                     <name>TRIGGER.DESCRIPTION</name>
@@ -153,11 +193,12 @@
     if (typeof params.HTTPProxy === 'string' &amp;&amp; params.HTTPProxy.trim() !== '') {&#13;
         req.SetProxy(params.HTTPProxy);&#13;
     }&#13;
-    var reqURL = params['ILERT.ALERT.SOURCE.URL'];&#13;
-    if (typeof reqURL === 'string' &amp;&amp; reqURL.trim() === '') {&#13;
-        throw 'incorrect value for variable &quot;ILERT.ALERT.SOURCE.URL&quot;. The value must be a non-empty string.';&#13;
+    var alertSourceKey = params['.ILERT.ALERT.SOURCE.KEY'];&#13;
+    if (typeof alertSourceKey === 'string' &amp;&amp; alertSourceKey.trim() === '') {&#13;
+        throw 'incorrect value for variable &quot;ILERT.ALERT.SOURCE.KEY&quot;. The value must be a non-empty string.';&#13;
     }&#13;
-    delete params['ILERT.ALERT.SOURCE.URL'];&#13;
+    delete params['.ILERT.ALERT.SOURCE.KEY'];&#13;
+    var reqURL = &quot;https://api.ilert.com/api/v1/events/zabbix/&quot; + alertSourceKey&#13;
 &#13;
     req.AddHeader('Accept: application/json');&#13;
     req.AddHeader('Content-Type: application/json');&#13;
