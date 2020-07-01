@@ -184,6 +184,8 @@
                     <value>{$ZABBIX.URL}</value>
                 </parameter>
             </parameters>
+            <attempts>10</attempts>
+            <attempt_interval>30s</attempt_interval>
             <script>try {&#13;
     var result = { tags: {} },&#13;
         params = JSON.parse(value),&#13;
