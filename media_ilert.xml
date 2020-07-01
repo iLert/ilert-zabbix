@@ -198,7 +198,7 @@
         throw 'incorrect value for variable &quot;ILERT.ALERT.SOURCE.KEY&quot;. The value must be a non-empty string.';&#13;
     }&#13;
     delete params['.ILERT.ALERT.SOURCE.KEY'];&#13;
-    var reqURL = &quot;https://api.ilert.com/api/v1/events/zabbix/&quot; + alertSourceKey&#13;
+    var reqURL = &quot;https://api.ilert.com/api/v1/events/zabbix-mt/&quot; + alertSourceKey&#13;
 &#13;
     req.AddHeader('Accept: application/json');&#13;
     req.AddHeader('Content-Type: application/json');&#13;
@@ -215,7 +215,7 @@
     }&#13;
 &#13;
     if (req.Status() != 200) {&#13;
-        if (typeof resp === 'object' &amp;&amp; typeof resp.message === 'string') {&#13;
+        if (!!resp &amp;&amp; typeof resp === 'object' &amp;&amp; typeof resp.message === 'string') {&#13;
             throw resp.message;&#13;
         }&#13;
         else {&#13;
@@ -223,7 +223,7 @@
         }&#13;
     }&#13;
 &#13;
-    if (typeof resp === 'object' &amp;&amp; typeof resp.incidentUrl === 'string') {&#13;
+    if (!!resp &amp;&amp; typeof resp === 'object' &amp;&amp; typeof resp.incidentUrl === 'string') {&#13;
         result.tags.ilert_incident_url = resp.incidentUrl;&#13;
     }&#13;
 &#13;
