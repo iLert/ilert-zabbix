@@ -184,8 +184,6 @@
                     <value>{$ZABBIX.URL}</value>
                 </parameter>
             </parameters>
-            <attempts>10</attempts>
-            <attempt_interval>30s</attempt_interval>
             <script>try {&#13;
     var result = { tags: {} },&#13;
         params = JSON.parse(value),&#13;
@@ -196,13 +194,16 @@
         req.SetProxy(params.HTTPProxy);&#13;
     }&#13;
     var alertSourceKey = params['.ILERT.ALERT.SOURCE.KEY'];&#13;
-    if (typeof alertSourceKey === 'string' &amp;&amp; alertSourceKey.trim() === '') {&#13;
+    if (!alertSourceKey || (typeof alertSourceKey === 'string' &amp;&amp; alertSourceKey.trim() === '')) {&#13;
         throw 'incorrect value for variable &quot;ILERT.ALERT.SOURCE.KEY&quot;. The value must be a non-empty string.';&#13;
     }&#13;
     delete params['.ILERT.ALERT.SOURCE.KEY'];&#13;
+    &#13;
+    var ilertApiBaseURL = &quot;https://api.ilert.com&quot;;&#13;
+    var reqURL = ilertApiBaseURL + &quot;/api/v1/events/zabbix-mt/&quot; + alertSourceKey&#13;
 &#13;
-    var ilertBaseURL = &quot;https://api.ilert.com&quot;;&#13;
-    var reqURL = ilertBaseURL + &quot;/api/v1/events/zabbix-mt/&quot; + alertSourceKey&#13;
+    var incidentKey = &quot;zabbix-&quot; + params['EVENT.ID'];&#13;
+    var incidentViewURL = ilertApiBaseURL + &quot;/api/v1/incidents/resolve-ik/&quot; + alertSourceKey + &quot;/&quot; + incidentKey;&#13;
 &#13;
     req.AddHeader('Accept: application/json');&#13;
     req.AddHeader('Content-Type: application/json');&#13;
@@ -219,17 +220,21 @@
     }&#13;
 &#13;
     if (req.Status() == 200) {&#13;
-        if (!!resp &amp;&amp; typeof resp === 'object' &amp;&amp; typeof resp.incidentUrl === 'string') {&#13;
-            result.tags.incident_id = resp.incidentUrl.replace(ilertBaseURL + &quot;/api/v1/incidents/&quot;, &quot;&quot;);&#13;
+        result.tags.__ilert_incident_url = incidentViewURL;&#13;
+        return JSON.stringify(result);&#13;
+    }&#13;
+&#13;
+    if (req.Status() == 400 &amp;&amp; typeof resp === 'object' &amp;&amp; typeof resp.code === 'string') {&#13;
+        if (resp.code === 'NO_OPEN_INCIDENT_WITH_KEY') {&#13;
+          return JSON.stringify(result);&#13;
         }&#13;
-        return JSON.stringify(result);&#13;
+        if (resp.code === 'INCIDENT_ALREADY_ACCEPTED') {&#13;
+          result.tags.__ilert_incident_url = incidentViewURL;&#13;
+          return JSON.stringify(result);&#13;
+        }&#13;
     }&#13;
 &#13;
-    if (req.Status() != 429 &amp;&amp; req.Status() &gt;= 400 &amp;&amp; req.Status() &lt;= 499) {&#13;
-        return JSON.stringify(result);&#13;
-    }&#13;
-&#13;
-    if (!!resp &amp;&amp; typeof resp === 'object' &amp;&amp; typeof resp.message === 'string') {&#13;
+    if (typeof resp === 'object' &amp;&amp; typeof resp.message === 'string') {&#13;
         throw resp.message;&#13;
     }&#13;
     else {&#13;
@@ -242,12 +247,12 @@ catch (error) {&#13;
 }</script>
             <process_tags>YES</process_tags>
             <show_event_menu>YES</show_event_menu>
-            <event_menu_url>{EVENT.TAGS.ilert_incident_url}</event_menu_url>
-            <event_menu_name>Alert in iLert</event_menu_name>
-            <description>Please refer to https://docs.ilert.com/integration/zabbix.&#13;
+            <event_menu_url>{EVENT.TAGS.__ilert_incident_url}</event_menu_url>
+            <event_menu_name>iLert incident</event_menu_name>
+            <description>Please refer to https://docs.ilert.com/integration/zabbix &#13;
   &#13;
 Set global macro {$ZABBIX.URL} with your Zabbix server URL.&#13;
-Add a dedicated user with the media type &quot;iLert&quot; and place the alert source key in the &quot;.ILERT.ALERT.SOURCE.KEY&quot; parameter to integrate into the service. You can also rewrite the incident summary via &quot;.ILERT.INCIDENT.SUMMARY&quot; parameter or leave it empty to use the standard pattern.</description>
+Add a dedicated user with the media type &quot;iLert&quot;. You can also rewrite the incident summary via &quot;.ILERT.INCIDENT.SUMMARY&quot; parameter or leave it empty to use the standard pattern.</description>
             <message_templates>
                 <message_template>
                     <event_source>TRIGGERS</event_source>
